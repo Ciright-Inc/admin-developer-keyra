@@ -1,0 +1,82 @@
+@import "tailwindcss";
+@import "./keyra-theme.css";
+
+:root {
+  --background: var(--ds-canvas);
+  --foreground: var(--ds-ink);
+  --popover: var(--ds-surface-card);
+  --popover-foreground: var(--ds-ink);
+  --card: var(--ds-surface-card);
+  --card-foreground: var(--ds-ink);
+  --border: var(--ds-hairline-strong);
+  --input: var(--ds-hairline-strong);
+  --ring: var(--ds-ink);
+  --accent: var(--ds-surface-strong);
+  --accent-foreground: var(--ds-ink);
+  --muted: var(--ds-surface-strong);
+  --muted-foreground: var(--ds-body);
+  --destructive: var(--ds-error);
+  --destructive-foreground: var(--ds-on-primary);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: var(--font-sans);
+}
+
+@keyframes loader-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.animate-loader-spin { animation: loader-spin 0.85s linear infinite; }
+
+@keyframes loader-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.animate-loader-bounce { animation: loader-bounce 1.2s ease-in-out infinite; }
+.animate-loader-bounce-delay-0 { animation-delay: 0s; }
+.animate-loader-bounce-delay-1 { animation-delay: 0.16s; }
+.animate-loader-bounce-delay-2 { animation-delay: 0.32s; }
+
+@keyframes ds-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ds-fade-up { animation: ds-fade-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+@keyframes ds-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+.ds-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--ds-canvas-soft) 0%,
+    var(--ds-surface-strong) 50%,
+    var(--ds-canvas-soft) 100%
+  );
+  background-size: 200px 100%;
+  animation: ds-shimmer 1.4s linear infinite;
+  border-radius: var(--ds-radius-sm);
+}
