@@ -10,7 +10,44 @@
 
 export type ThemeMode = "dark" | "light";
 
-const DARK = {
+/**
+ * Shared shape for every theme. Using an explicit interface (rather than
+ * `as const` + `typeof`) keeps property values widened to `string`, so the
+ * dark and light palettes are mutually assignable to `DesignTokens` even
+ * though their literal hex values differ.
+ */
+export interface DesignTokens {
+  canvas: string;
+  canvasSoft: string;
+  surfaceCard: string;
+  surfaceStrong: string;
+  surfaceDark: string;
+  hairline: string;
+  hairlineSoft: string;
+  hairlineStrong: string;
+  ink: string;
+  body: string;
+  muted: string;
+  mutedSoft: string;
+  onPrimary: string;
+  onDark: string;
+  primary: string;
+  primaryActive: string;
+  textLink: string;
+  textLink2: string;
+  success: string;
+  error: string;
+  warning: string;
+  info: string;
+  critical: string;
+  trust0: string;
+  trust25: string;
+  trust50: string;
+  trust75: string;
+  trust100: string;
+}
+
+const DARK: DesignTokens = {
   canvas: "#0a0a0a",
   canvasSoft: "#111111",
   surfaceCard: "#171717",
@@ -39,9 +76,9 @@ const DARK = {
   trust50: "#f59e0b",
   trust75: "#4ade80",
   trust100: "#22c55e",
-} as const;
+};
 
-const LIGHT = {
+const LIGHT: DesignTokens = {
   canvas: "#ffffff",
   canvasSoft: "#fafafa",
   surfaceCard: "#ffffff",
@@ -70,14 +107,12 @@ const LIGHT = {
   trust50: "#ab6400",
   trust75: "#15803d",
   trust100: "#16a34a",
-} as const;
+};
 
-export type DesignTokens = typeof DARK;
-
-export const DS = {
+export const DS: Readonly<Record<ThemeMode, DesignTokens>> = {
   dark: DARK,
   light: LIGHT,
-} as const;
+};
 
 /** Read the active mode from the document. SSR-safe (defaults to dark). */
 export function getActiveThemeMode(): ThemeMode {

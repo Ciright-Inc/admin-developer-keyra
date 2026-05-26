@@ -13,7 +13,31 @@ import {
   markPendingAuthReturn,
 } from "@/lib/get-started-sign-in-url";
 
+function LoginFallback() {
+  return (
+    <div className="min-h-screen grid place-items-center px-6 bg-[var(--ds-canvas-soft)]">
+      <div className="w-full max-w-md ds-feature-card">
+        <div className="p-8">
+          <div className="ds-skeleton h-7 w-32 mb-6" />
+          <div className="ds-skeleton h-6 w-48 mb-3" />
+          <div className="ds-skeleton h-4 w-full mb-2" />
+          <div className="ds-skeleton h-4 w-3/4 mb-6" />
+          <div className="ds-skeleton h-10 w-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginPage() {
+  return (
+    <React.Suspense fallback={<LoginFallback />}>
+      <LoginPageContent />
+    </React.Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
   const params = useSearchParams();
   const status = useAdminAuthStore((s) => s.status);
