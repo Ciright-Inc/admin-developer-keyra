@@ -1,6 +1,6 @@
 "use client";
 
-import { AUTH_BACKEND_URL } from "@/lib/admin-backend-url";
+import { AUTH_BACKEND_URL, normalizeOrigin } from "@/lib/admin-backend-url";
 
 const LOCAL_GET_STARTED = "http://localhost:5173";
 const PRODUCTION_GET_STARTED = "https://get-started.keyra.ie";
@@ -28,7 +28,7 @@ function isLocalAuthBackend(): boolean {
 
 /** Resolve the get-started origin for the current environment. */
 export function getGetStartedPublicOrigin(): string {
-  const explicit = process.env.NEXT_PUBLIC_GET_STARTED_URL?.trim().replace(/\/+$/, "");
+  const explicit = normalizeOrigin(process.env.NEXT_PUBLIC_GET_STARTED_URL);
   if (explicit) return explicit;
   if (process.env.NODE_ENV === "development") return LOCAL_GET_STARTED;
   if (typeof window !== "undefined" && isLocalHostname(window.location.hostname)) return LOCAL_GET_STARTED;
@@ -38,18 +38,31 @@ export function getGetStartedPublicOrigin(): string {
 
 /** Resolve the admin console origin (consistent on server + client for hydration). */
 export function getAdminConsoleOrigin(): string {
-  const explicit = process.env.NEXT_PUBLIC_GLOBAL_ADMIN_URL?.trim().replace(/\/+$/, "");
+  const explicit = normalizeOrigin(process.env.NEXT_PUBLIC_GLOBAL_ADMIN_URL);
   if (explicit) return explicit;
   if (process.env.NODE_ENV === "development") return LOCAL_ADMIN_CONSOLE;
   if (typeof window !== "undefined") return window.location.origin;
   return PRODUCTION_ADMIN_CONSOLE;
 }
 
-/** Build an absolute return URL into the admin console (default `/dashboard`). */
+/**
+ * Build an absolute return URL into the admin console (default `/dashboard`).
+ *
+ * Wrapped in try/catch so a misconfigured `NEXT_PUBLIC_GLOBAL_ADMIN_URL`
+ * (e.g. missing scheme) degrades to safe string concatenation rather than
+ * throwing `Invalid base URL` and tearing down the login page on Railway.
+ */
 export function buildAdminReturnUrl(returnPath = "/dashboard"): string {
-  const url = new URL(returnPath, getAdminConsoleOrigin());
-  url.searchParams.set(AUTH_RETURN_PARAM, "1");
-  return url.toString();
+  const origin = getAdminConsoleOrigin();
+  const path = returnPath.startsWith("/") ? returnPath : `/${returnPath}`;
+  try {
+    const url = new URL(path, origin);
+    url.searchParams.set(AUTH_RETURN_PARAM, "1");
+    return url.toString();
+  } catch {
+    const separator = path.includes("?") ? "&" : "?";
+    return `${origin}${path}${separator}${AUTH_RETURN_PARAM}=1`;
+  }
 }
 
 /** Build the get-started sign-in URL with ?return= pointing back to the admin console. */

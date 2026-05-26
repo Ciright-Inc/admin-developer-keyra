@@ -1,11 +1,19 @@
 /**
- * Resolves the simsecure-auth-session backend URL where all /admin/global/* endpoints live.
- * Values like "auth.keyra.ie" without a scheme are normalised to absolute URLs.
+ * Normalise an origin-like env var value to an absolute URL.
+ *
+ * Accepts:
+ *   "auth.keyra.ie"                 -> "https://auth.keyra.ie"
+ *   "localhost:4000"                -> "http://localhost:4000"
+ *   "https://auth.keyra.ie/"        -> "https://auth.keyra.ie"
+ *   "" / undefined / null / "   "   -> ""
+ *
+ * Used for every NEXT_PUBLIC_*_URL so Railway-style env vars that omit the
+ * scheme don't blow up `new URL(...)` callers at runtime.
  */
-export function normalizeBackendBaseUrl(value: string): string {
+export function normalizeOrigin(value: string | undefined | null): string {
   const trimmed = String(value ?? "").trim().replace(/\/+$/, "");
   if (!trimmed) return "";
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
   const hostOnly = trimmed.split("/")[0] ?? "";
   if (/^localhost(:\d+)?$/i.test(hostOnly) || /^127\.0\.0\.1(:\d+)?$/i.test(hostOnly)) {
     return `http://${trimmed}`;
@@ -13,9 +21,12 @@ export function normalizeBackendBaseUrl(value: string): string {
   return `https://${trimmed}`;
 }
 
+/** Back-compat alias — earlier callers imported this name. */
+export const normalizeBackendBaseUrl = normalizeOrigin;
+
 const raw = process.env.NEXT_PUBLIC_SIMSECURE_AUTH_BACKEND_URL ?? "http://localhost:4000";
 
-export const AUTH_BACKEND_URL = normalizeBackendBaseUrl(raw) || "http://localhost:4000";
+export const AUTH_BACKEND_URL = normalizeOrigin(raw) || "http://localhost:4000";
 
 /** Base URL of all /admin/global/* endpoints. */
 export const ADMIN_API_BASE = `${AUTH_BACKEND_URL}/admin/global`;
