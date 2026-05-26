@@ -23,6 +23,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const FAVICON_PATH = "/assets/Keyra_favicon.png";
+
 export const metadata: Metadata = {
   title: {
     default: "KEYRA Global Developer Administration",
@@ -33,6 +35,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://admin.developer.keyra.ie"),
   applicationName: "KEYRA Global Admin",
   robots: { index: false, follow: false },
+  icons: {
+    icon: [{ url: FAVICON_PATH, type: "image/png" }],
+    apple: FAVICON_PATH,
+    shortcut: FAVICON_PATH,
+  },
+  manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {

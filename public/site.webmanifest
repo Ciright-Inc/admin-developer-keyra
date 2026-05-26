@@ -1,0 +1,17 @@
+{
+  "name": "KEYRA Global Admin",
+  "short_name": "KEYRA Admin",
+  "description": "Master control layer for the worldwide KEYRA developer ecosystem — governance, AI agent accountability, trust verification, and telecom-grade identity.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/assets/Keyra_favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
