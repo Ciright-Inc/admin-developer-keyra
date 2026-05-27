@@ -114,8 +114,10 @@ function LoginPageContent() {
               <div className="text-[13px] text-[var(--ds-body)] flex items-start gap-2">
                 <MaterialIcon name="cloud_off" size={16} className="text-[var(--ds-warning)] mt-0.5" />
                 <span>
-                  The admin backend is not reachable. Start{" "}
-                  <code className="font-mono text-[var(--ds-ink)]">simsecure-auth-session</code> on port 4000 and reload.
+                  The admin backend is not reachable at{" "}
+                  <code className="font-mono text-[var(--ds-ink)]">localhost:4000</code>. Start{" "}
+                  <code className="font-mono text-[var(--ds-ink)]">simsecure-auth-session</code> and ensure get-started
+                  uses the same auth URL (not 127.0.0.1).
                 </span>
               </div>
             </div>

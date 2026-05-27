@@ -1,6 +1,6 @@
 "use client";
 
-import { AUTH_BACKEND_URL, normalizeOrigin } from "@/lib/admin-backend-url";
+import { AUTH_BACKEND_URL, normalizeAuthBackendUrl, normalizeOrigin } from "@/lib/admin-backend-url";
 
 const LOCAL_GET_STARTED = "http://localhost:5173";
 const PRODUCTION_GET_STARTED = "https://get-started.keyra.ie";
@@ -16,7 +16,7 @@ function isLocalHostname(hostname: string): boolean {
 }
 
 function isLocalAuthBackend(): boolean {
-  const trimmed = String(AUTH_BACKEND_URL ?? "").trim();
+  const trimmed = String(normalizeAuthBackendUrl(AUTH_BACKEND_URL) ?? AUTH_BACKEND_URL ?? "").trim();
   if (!trimmed) return true;
   try {
     const { hostname } = new URL(trimmed);

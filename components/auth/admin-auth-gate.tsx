@@ -43,9 +43,17 @@ export function AdminAuthGate({ children }: { children: React.ReactNode }) {
       clearPendingAuthReturn();
       setAuthReturnFlow(false);
     }
-    if (hydrated && status === "unauthenticated") {
-      router.replace("/login");
+  }, [status, authReturnFlow]);
+
+  useEffect(() => {
+    if (!hydrated || status === "loading" || status === "idle") return;
+    if (status !== "unauthenticated") return;
+
+    if (authReturnFlow) {
+      clearPendingAuthReturn();
+      setAuthReturnFlow(false);
     }
+    router.replace("/login");
   }, [hydrated, status, router, authReturnFlow]);
 
   const waitingSession = !hydrated || status === "idle" || status === "loading";
