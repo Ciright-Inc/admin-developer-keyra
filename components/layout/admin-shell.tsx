@@ -57,8 +57,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           >
             <MaterialIcon name="close" size={20} />
           </button>
-          <aside className="ds-app-shell__mobile-drawer-panel absolute left-0 top-0 flex w-[260px] max-w-[85vw] flex-col">
-            <Sidebar />
+          <aside className="ds-app-shell__mobile-drawer-panel absolute left-0 top-0 flex w-[240px] max-w-[85vw] flex-col bg-[var(--ds-surface-dark)]">
+            <MobileSidebar onNavigate={() => setOpen(false)} />
           </aside>
         </div>
       ) : null}
@@ -86,6 +86,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </main>
         <SiteFooter />
       </div>
+    </div>
+  );
+}
+
+function MobileSidebar({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <div
+      onClick={(e) => {
+        const target = e.target as HTMLElement | null;
+        if (!target) return;
+        const actionable = target.closest("a,button");
+        if (!actionable) return;
+        setTimeout(() => onNavigate(), 0);
+      }}
+      className="flex h-full min-h-0 flex-col overflow-hidden [&_aside]:flex [&_aside]:h-full [&_aside]:min-h-0 [&_aside]:w-full [&_aside]:max-w-none [&_aside]:border-r-0"
+    >
+      <Sidebar forceVisible />
     </div>
   );
 }

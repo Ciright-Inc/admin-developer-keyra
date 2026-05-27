@@ -267,152 +267,301 @@ a { color: inherit; }
   border-color: var(--ds-ink);
 }
 
+.ds-app-shell__mobile-drawer-panel .ds-sidebar.ds-sidebar--drawer {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+}
+
 /* -------------------------------------------------------------------------- */
-/* Sidebar — always dark                                                       */
+/* Session splash (matches simsecure-developer)                                */
+/* -------------------------------------------------------------------------- */
+
+.ds-session-splash {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  background: var(--ds-canvas);
+}
+
+.ds-session-splash__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 40px;
+}
+
+.ds-session-splash__logo-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  animation: ds-session-splash-logo-in 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ds-session-splash-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ds-session-splash__logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  height: auto;
+  width: 64px;
+  max-width: none;
+  transform: translate(-50%, -50%);
+}
+
+.ds-session-splash__logo--dark {
+  display: none;
+}
+
+[data-theme="dark"] .ds-session-splash__logo--light {
+  display: none;
+}
+
+[data-theme="dark"] .ds-session-splash__logo--dark {
+  display: block;
+}
+
+.ds-session-splash__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.ds-session-splash__eyebrow {
+  margin: 0;
+  font: 600 10px/1.3 var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ds-muted-soft);
+  animation: ds-session-splash-text-in 0.55s ease-out 0.18s both;
+}
+
+.ds-session-splash__welcome {
+  margin: 0;
+  font: 600 1.125rem/1.25 var(--font-sans);
+  letter-spacing: -0.02em;
+  color: var(--ds-ink);
+  animation: ds-session-splash-text-in 0.55s ease-out 0.28s both;
+}
+
+@keyframes ds-session-splash-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ds-session-splash__progress {
+  width: 120px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-hairline);
+  animation: ds-session-splash-text-in 0.5s ease-out 0.38s both;
+}
+
+.ds-session-splash__progress-fill {
+  display: block;
+  height: 100%;
+  width: 36%;
+  border-radius: inherit;
+  background: var(--ds-ink);
+  animation: ds-session-splash-progress 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes ds-session-splash-progress {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(310%);
+  }
+}
+
+.ds-session-splash__message {
+  margin: 0;
+  max-width: 16rem;
+  font: 400 13px/1.45 var(--font-sans);
+  color: var(--ds-body);
+  animation: ds-session-splash-text-in 0.55s ease-out 0.48s both;
+}
+
+.ds-session-splash--intro-done .ds-session-splash__logo-wrap,
+.ds-session-splash--intro-done .ds-session-splash__eyebrow,
+.ds-session-splash--intro-done .ds-session-splash__welcome,
+.ds-session-splash--intro-done .ds-session-splash__progress {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+.ds-session-splash--intro-done .ds-session-splash__message {
+  animation: ds-session-splash-message-in 0.3s ease-out both;
+}
+
+@keyframes ds-session-splash-message-in {
+  from {
+    opacity: 0.55;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-session-splash__logo-wrap,
+  .ds-session-splash__eyebrow,
+  .ds-session-splash__welcome,
+  .ds-session-splash__progress,
+  .ds-session-splash__message {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .ds-session-splash--intro-done .ds-session-splash__message {
+    animation: none;
+  }
+
+  .ds-session-splash__progress-fill {
+    animation: none;
+    transform: translateX(0);
+    width: 55%;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dashboard sidebar (matches simsecure-developer)                               */
 /* -------------------------------------------------------------------------- */
 
 .ds-sidebar {
-  position: relative;
+  display: flex;
   width: 240px;
   min-width: 240px;
   max-width: 240px;
   min-height: 100vh;
-  background: var(--ds-shell-sidebar-bg);
+  flex-direction: column;
+  background: var(--ds-surface-dark);
   color: var(--ds-on-dark);
-  display: flex;
-  flex-direction: column;
 }
 
-.ds-sidebar__brand {
-  padding: 16px 16px 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+[data-theme="dark"] .ds-sidebar {
+  background: var(--ds-shell-sidebar-bg, #141414);
 }
 
-.ds-sidebar__brand-link {
-  display: inline-flex;
+.ds-sidebar-header {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ds-sidebar-brand {
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
-  gap: 10px;
-  text-decoration: none;
+  width: 100%;
 }
 
-.ds-sidebar__brand-logo {
-  height: 24px;
+.ds-sidebar-brand-link {
+  display: inline-flex;
+  justify-content: flex-start;
+  align-items: center;
+  max-width: 100%;
+}
+
+.ds-sidebar-brand-logo {
+  height: 44px;
   width: auto;
+  max-width: 100%;
   object-fit: contain;
 }
 
-.ds-sidebar__brand-title {
-  font: 600 13px/1.2 var(--font-accent);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ds-on-dark);
-}
-
-.ds-sidebar__brand-sub {
-  font: 400 11px/1.2 var(--font-sans);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.ds-sidebar__org {
-  border-radius: var(--ds-radius-md);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 12px;
-}
-
-.ds-sidebar__org-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  display: grid;
-  place-items: center;
-  color: var(--ds-on-dark);
-  font: 700 11px/1 var(--font-sans);
-}
-
-.ds-sidebar__org-meta { line-height: 1.2; }
-.ds-sidebar__org-title {
-  font: 600 12.5px/1.2 var(--font-sans);
-  color: var(--ds-on-dark);
-}
-.ds-sidebar__org-sub {
-  font: 400 10.5px/1.2 var(--font-sans);
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.ds-sidebar__body {
+.ds-sidebar-body {
   flex: 1 1 auto;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
-  padding: 8px 8px 16px 8px;
+  padding-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
 }
 
-.ds-sidebar__section-label,
 .ds-sidebar-section-label {
-  padding: 16px 12px 8px 12px;
+  padding: 16px 16px 8px;
   font: 600 11px/1.4 var(--font-sans);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+  color: #b0b4ba;
 }
 
 .ds-sidebar-link {
   position: relative;
   display: flex;
-  min-height: 36px;
+  min-height: 40px;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
-  border-radius: var(--ds-radius-sm);
-  color: rgba(255, 255, 255, 0.70);
-  font: 500 13px/1 var(--font-sans);
+  padding: 8px 16px;
+  font: 500 14px/1 var(--font-sans);
+  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
-  cursor: pointer;
-  white-space: nowrap;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.ds-sidebar-link__icon {
-  font-size: 18px;
-  width: 18px;
-  display: inline-grid;
-  place-items: center;
-  color: rgba(255, 255, 255, 0.55);
-  flex-shrink: 0;
-  transition: color 0.2s ease;
-}
-
 .ds-sidebar-link:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--ds-on-dark);
 }
-.ds-sidebar-link:hover .ds-sidebar-link__icon { color: var(--ds-on-dark); }
 
 .ds-sidebar-link.is-active {
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.12);
   color: var(--ds-on-dark);
 }
-.ds-sidebar-link.is-active .ds-sidebar-link__icon { color: var(--ds-on-dark); }
+
 .ds-sidebar-link.is-active::before {
   content: "";
   position: absolute;
-  left: -8px;
-  top: 6px;
-  bottom: 6px;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 2px;
   background: var(--ds-on-dark);
-  border-radius: 1px;
+}
+
+.ds-sidebar-link .material-symbols-outlined {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ds-sidebar-link:hover .material-symbols-outlined,
+.ds-sidebar-link.is-active .material-symbols-outlined {
+  color: var(--ds-on-dark);
 }
 
 .ds-sidebar-link__badge {
@@ -420,70 +569,87 @@ a { color: inherit; }
   font: 600 10px/1 var(--font-sans);
   padding: 2px 6px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--ds-on-dark);
 }
 
-.ds-sidebar__footer {
+.ds-sidebar-profile {
+  flex-shrink: 0;
   padding: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.ds-sidebar-profile {
-  padding: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
-}
 .ds-sidebar-profile__card {
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--ds-radius-md);
   background: rgba(255, 255, 255, 0.04);
   padding: 10px;
 }
-.ds-sidebar-profile__row {
+
+.ds-sidebar-profile__main {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
 }
+
 .ds-sidebar-profile__avatar {
   display: flex;
-  height: 32px;
-  width: 32px;
+  height: 36px;
+  width: 36px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.10);
-  font: 600 11px/1 var(--font-sans);
+  background: rgba(255, 255, 255, 0.1);
+  font: 600 12px/1 var(--font-sans);
   color: var(--ds-on-dark);
-  flex-shrink: 0;
 }
+
+.ds-sidebar-profile__info {
+  min-width: 0;
+  flex: 1;
+}
+
 .ds-sidebar-profile__name {
-  font: 600 12.5px/1.2 var(--font-sans);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 600 13px/1.3 var(--font-sans);
   color: var(--ds-on-dark);
 }
+
 .ds-sidebar-profile__meta {
-  font: 400 11px/1.2 var(--font-sans);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 400 11px/1.35 var(--font-sans);
   color: rgba(255, 255, 255, 0.55);
 }
+
 .ds-sidebar-profile__action {
   display: inline-flex;
   width: 100%;
-  min-height: 30px;
-  gap: 6px;
-  margin-top: 10px;
+  min-height: 32px;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  gap: 6px;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--ds-radius-sm);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.03);
   padding: 0 8px;
   font: 500 11px/1 var(--font-sans);
   color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
+
 .ds-sidebar-profile__action:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
   color: var(--ds-on-dark);
 }
 

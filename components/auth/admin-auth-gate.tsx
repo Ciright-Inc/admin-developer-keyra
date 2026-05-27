@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuthStore } from "@/hooks/use-admin-auth-store";
 import { consumeAuthReturnUrlParam, hasPendingAuthReturn, clearPendingAuthReturn } from "@/lib/get-started-sign-in-url";
+import { MIN_SESSION_SPLASH_MS } from "@/lib/session-splash";
+import { SessionSplash } from "@/components/layout/session-splash";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { Button } from "@/components/ui/button";
 
@@ -18,10 +20,16 @@ export function AdminAuthGate({ children }: { children: React.ReactNode }) {
   const signOut = useAdminAuthStore((s) => s.signOut);
 
   const [authReturnFlow, setAuthReturnFlow] = useState(false);
+  const [bootMinElapsed, setBootMinElapsed] = useState(false);
 
   useEffect(() => {
     void init();
   }, [init]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setBootMinElapsed(true), MIN_SESSION_SPLASH_MS);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (hasPendingAuthReturn()) {
@@ -40,12 +48,26 @@ export function AdminAuthGate({ children }: { children: React.ReactNode }) {
     }
   }, [hydrated, status, router, authReturnFlow]);
 
-  if (!hydrated || status === "idle" || status === "loading") {
-    return <Splash label={authReturnFlow ? "Signing you in…" : "Verifying session…"} />;
-  }
+  const waitingSession = !hydrated || status === "idle" || status === "loading";
+  const redirectingToLogin = hydrated && status === "unauthenticated";
+  const showSplash = waitingSession || redirectingToLogin || !bootMinElapsed;
 
-  if (status === "unauthenticated") {
-    return <Splash label="Redirecting to sign-in…" />;
+  if (showSplash) {
+    const message = redirectingToLogin
+      ? "Redirecting to sign-in…"
+      : authReturnFlow
+        ? "Signing you in…"
+        : waitingSession
+          ? "Verifying session…"
+          : "Loading session…";
+
+    return (
+      <SessionSplash
+        message={message}
+        eyebrow="Global Administration Console"
+        welcomeLine={authReturnFlow ? "Welcome" : null}
+      />
+    );
   }
 
   if (status === "forbidden") {
@@ -101,29 +123,6 @@ export function AdminAuthGate({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>;
-}
-
-function Splash({ label }: { label: string }) {
-  return (
-    <div className="min-h-screen grid place-items-center px-6 bg-[var(--ds-canvas-soft)]">
-      <div className="flex flex-col items-center gap-4 ds-fade-up">
-        <img
-          src="/assets/keyra_logo_sq_black.png"
-          alt=""
-          className="h-10 w-auto ds-topnav__crumb-logo--light"
-        />
-        <img
-          src="/assets/keyra_logo_sq_white.png"
-          alt=""
-          className="h-10 w-auto ds-topnav__crumb-logo--dark"
-        />
-        <div className="flex items-center gap-2.5 text-[12.5px] tracking-wider uppercase text-[var(--ds-muted)] font-medium">
-          <span className="animate-loader-spin inline-block h-3.5 w-3.5 rounded-full border-2 border-[var(--ds-hairline-strong)] border-t-[var(--ds-ink)]" />
-          {label}
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function BlockedScreen({
