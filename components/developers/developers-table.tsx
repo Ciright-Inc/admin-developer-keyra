@@ -98,7 +98,7 @@ export function DevelopersTable() {
         </div>
       }
     >
-      <div className="px-3 pt-3">
+      <div className="px-4 pt-4">
         <FilterBar
           search={search}
           onSearch={setSearch}
@@ -115,7 +115,7 @@ export function DevelopersTable() {
           }}
         />
       </div>
-      <div className="ds-table-wrap !rounded-none !border-0 mt-3">
+      <div className="ds-table-wrap is-scrollable mt-4">
         <table className="ds-table ds-table--compact">
           <thead>
             {table.getHeaderGroups().map((hg) => (
@@ -203,7 +203,7 @@ function FilterBar(props: {
 }) {
   return (
     <div className="ds-filter-bar">
-      <div className="relative">
+      <div className="relative flex-1 min-w-[240px]">
         <MaterialIcon name="search" size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--ds-muted)]" />
         <input
           value={props.search}
@@ -212,23 +212,33 @@ function FilterBar(props: {
           className="ds-input ds-input--icon"
         />
       </div>
-      <select className="ds-select" value={props.country} onChange={(e) => props.onCountry(e.target.value)}>
-        <option value="">Country (all)</option>
-        {COUNTRY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
-      </select>
-      <select className="ds-select" value={props.industry} onChange={(e) => props.onIndustry(e.target.value)}>
-        <option value="">Industry (all)</option>
-        {INDUSTRY_OPTIONS.map((i) => <option key={i} value={i}>{i.replace(/_/g, " ")}</option>)}
-      </select>
-      <select className="ds-select" value={props.status} onChange={(e) => props.onStatus(e.target.value)}>
-        <option value="">Status (all)</option>
-        {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-      </select>
-      <select className="ds-select" value={props.lifecycle} onChange={(e) => props.onLifecycle(e.target.value)}>
-        <option value="">Lifecycle (all)</option>
-        {LIFECYCLE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-      </select>
-      <Button variant="ghost" size="sm" onClick={props.onReset}><MaterialIcon name="restart_alt" size={13}/> Reset</Button>
+      <div className="w-[170px] min-w-[170px]">
+        <select className="ds-select" value={props.country} onChange={(e) => props.onCountry(e.target.value)}>
+          <option value="">Country (all)</option>
+          {COUNTRY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+      <div className="w-[190px] min-w-[190px]">
+        <select className="ds-select" value={props.industry} onChange={(e) => props.onIndustry(e.target.value)}>
+          <option value="">Industry (all)</option>
+          {INDUSTRY_OPTIONS.map((i) => <option key={i} value={i}>{i.replace(/_/g, " ")}</option>)}
+        </select>
+      </div>
+      <div className="w-[160px] min-w-[160px]">
+        <select className="ds-select" value={props.status} onChange={(e) => props.onStatus(e.target.value)}>
+          <option value="">Status (all)</option>
+          {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </div>
+      <div className="w-[170px] min-w-[170px]">
+        <select className="ds-select" value={props.lifecycle} onChange={(e) => props.onLifecycle(e.target.value)}>
+          <option value="">Lifecycle (all)</option>
+          {LIFECYCLE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </div>
+      <Button variant="ghost" size="sm" onClick={props.onReset}>
+        <MaterialIcon name="restart_alt" size={13}/> Reset
+      </Button>
     </div>
   );
 }
