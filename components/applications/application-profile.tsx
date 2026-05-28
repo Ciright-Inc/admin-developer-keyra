@@ -60,7 +60,7 @@ export function ApplicationProfile({
 
   return (
     <div className="flex flex-col gap-4">
-      <ApplicationHeader application={application} onSuspend={onSuspend} onRevoke={onRevoke} />
+      <ApplicationHeader application={application} ideUrl={ideUrl} onSuspend={onSuspend} onRevoke={onRevoke} />
       <Tabs items={TABS} value={active} onValueChange={setActive}>
         <TabPanel value="overview" className="ds-tabs__content"><OverviewTab a={application} /></TabPanel>
         <TabPanel value="credentials" className="ds-tabs__content"><CredentialsTab id={application.id} /></TabPanel>
@@ -82,8 +82,8 @@ function ApplicationHeader({
 }: {
   application: Application;
   ideUrl: string;
-  onSuspend: () => void;
-  onRevoke: () => void;
+  onSuspend: () => void | Promise<void>;
+  onRevoke: () => void | Promise<void>;
 }) {
   return (
     <section className="ds-profile-header flex-col xl:flex-row items-stretch xl:items-center justify-between gap-6">
