@@ -46,10 +46,13 @@ export interface AppApiKey {
   prefix: string;
   hashed_key: string;
   environment: string;
-  scopes: string[];
+  scopes?: string[];
+  type?: string;
+  client_id?: string | null;
+  name?: string | null;
   status: string;
   last_used_at: string | null;
-  revoked_at: string | null;
+  revoked_at?: string | null;
   created_at: string;
 }
 export async function listAppKeys(id: string): Promise<AppApiKey[]> {

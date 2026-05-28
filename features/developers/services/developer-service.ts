@@ -1,4 +1,5 @@
 import { adminFetch, AdminApiError } from "@/lib/admin-fetch";
+import { adminUrl } from "@/lib/admin-backend-url";
 import type { DataResponse, Developer, ListResponse } from "@/types/admin";
 
 export interface DeveloperListQuery {
@@ -56,4 +57,31 @@ export async function escalateDeveloper(id: string, reason?: string, severity = 
 }
 export async function resetDeveloperApiKeys(id: string): Promise<void> {
   await adminFetch(`/developers/${id}/reset-api-keys`, { method: "POST" });
+}
+
+export async function impersonateDeveloper(id: string): Promise<{ redirectUrl: string }> {
+  const r = await adminFetch<{ ok: true; data: { redirectUrl: string } }>(`/developers/${id}/impersonate`, {
+    method: "POST",
+  });
+  return r.data;
+}
+
+export async function messageDeveloper(
+  id: string,
+  payload: { title?: string; body: string },
+): Promise<void> {
+  await adminFetch(`/developers/${id}/message`, { method: "POST", body: payload });
+}
+
+/** Opens CSV export in a new tab (same session cookies). */
+export function developersExportUrl(query: DeveloperListQuery = {}): string {
+  const u = new URLSearchParams();
+  if (query.search) u.set("search", query.search);
+  if (query.country) u.set("country", query.country);
+  if (query.industry) u.set("industry", query.industry);
+  if (query.status) u.set("status", query.status);
+  if (query.lifecycle) u.set("lifecycle", query.lifecycle);
+  if (query.sort) u.set("sort", query.sort);
+  const qs = u.toString();
+  return adminUrl(`/developers/export${qs ? `?${qs}` : ""}`);
 }

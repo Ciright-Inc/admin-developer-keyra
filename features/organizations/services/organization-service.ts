@@ -34,3 +34,8 @@ export async function getOrganization(id: string): Promise<Organization | null> 
     throw err;
   }
 }
+
+export async function getOrganizationCrmLink(id: string): Promise<{ url: string }> {
+  const r = await adminFetch<{ ok: true; data: { url: string } }>(`/organizations/${id}/crm-link`);
+  return r.data;
+}

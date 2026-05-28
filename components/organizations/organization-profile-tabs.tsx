@@ -14,16 +14,11 @@ import type { Organization } from "@/types/admin";
 const TABS: TabItem[] = [
   { value: "overview", label: "Overview", icon: "dashboard" },
   { value: "teams", label: "Teams", icon: "groups" },
-  { value: "applications", label: "Applications", icon: "deployed_code" },
-  { value: "sdks", label: "SDKs", icon: "package_2" },
-  { value: "security", label: "Security", icon: "shield" },
-  { value: "compliance", label: "Compliance", icon: "policy" },
+  { value: "applications", label: "Projects", icon: "deployed_code" },
   { value: "telecom", label: "Telecom", icon: "cell_tower" },
   { value: "identity", label: "Identity infra", icon: "key" },
   { value: "financials", label: "Financials", icon: "payments" },
   { value: "audit", label: "Audit history", icon: "manage_search" },
-  { value: "offices", label: "Global offices", icon: "location_city" },
-  { value: "partners", label: "Partners", icon: "handshake" },
 ];
 
 export function OrganizationProfileTabs({ organization }: { organization: Organization }) {
@@ -60,8 +55,7 @@ function OverviewTab({ organization: o }: { organization: Organization }) {
           ["Monthly recurring", formatCurrency(Number(o.monthly_recurring_revenue_usd))],
           ["API utilization", formatPercent(Number(o.api_utilization_pct))],
           ["Developer count", formatNumber(o.developer_count)],
-          ["Application count", formatNumber(o.application_count)],
-          ["AI agent count", formatNumber(o.ai_agent_count)],
+          ["Project count", formatNumber(o.application_count)],
         ]} />
       </Panel>
       <Panel title="Trust & risk" icon="verified_user">
@@ -112,13 +106,10 @@ function DynamicTab({ id, tab }: { id: string; tab: string }) {
 }
 
 const COL_HINTS: Record<string, string[]> = {
-  teams: ["display_name", "professional_email", "role", "created_at"],
-  applications: ["name", "platform", "status", "trust_status", "monthly_active_users", "daily_api_calls", "revenue_generated_usd"],
-  sdks: ["name", "platform", "version", "installs"],
-  security: ["event_category", "severity", "status", "description", "occurred_at"],
-  compliance: ["framework", "status", "attested_at", "expires_at"],
-  telecom: ["carrier_name", "status", "verification_density_pct", "monthly_requests"],
-  audit: ["action", "actor_user_id", "ip_address", "occurred_at"],
+  teams: ["display_name", "professional_email", "developer_account_id", "role", "created_at"],
+  applications: ["name", "platform", "environment", "status", "active_api_key_count", "daily_api_calls", "updated_at"],
+  telecom: ["project_name", "callback_url", "environment", "status", "active_keys"],
+  audit: ["action", "target_type", "target_id", "occurred_at"],
 };
 
 function AutoTable({ rows, tab }: { rows: Record<string, unknown>[]; tab: string }) {

@@ -2,15 +2,9 @@
 
 import * as React from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { toast } from "sonner";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { Button } from "@/components/ui/button";
-import {
-  resetDeveloperApiKeys,
-  suspendDeveloper,
-  verifyDeveloper,
-  escalateDeveloper,
-} from "@/features/developers/services/developer-service";
+import { useDeveloperActions } from "@/features/developers/hooks/use-developer-actions";
 import type { Developer } from "@/types/admin";
 
 interface Props {
@@ -19,20 +13,10 @@ interface Props {
 }
 
 export function DeveloperRowActions({ developer, onChanged }: Props) {
-  const [busy, setBusy] = React.useState(false);
-
-  const run = async (label: string, fn: () => Promise<void>) => {
-    setBusy(true);
-    try {
-      await fn();
-      toast.success(`${label} — ${developer.display_name}`);
-      onChanged?.();
-    } catch (err) {
-      toast.error(`${label} failed: ${(err as Error)?.message ?? "unknown error"}`);
-    } finally {
-      setBusy(false);
-    }
-  };
+  const actions = useDeveloperActions(developer, onChanged);
+  const busy = actions.busy;
+  const disabled = !actions.canAct;
+  const disabledTitle = actions.disabledReason;
 
   return (
     <DropdownMenu.Root>
@@ -45,15 +29,14 @@ export function DeveloperRowActions({ developer, onChanged }: Props) {
         <DropdownMenu.Content className="ds-menu" sideOffset={6} align="end">
           <Item icon="visibility" label="View profile" href={`/developers/${developer.id}`} />
           <DropdownMenu.Separator className="ds-menu__sep" />
-          <Item icon="verified_user" label="Verify" onSelect={() => run("Verified", () => verifyDeveloper(developer.id))} />
-          <Item icon="report" label="Escalate" onSelect={() => run("Escalated", () => escalateDeveloper(developer.id, "Manual review", "medium"))} />
-          <Item icon="vpn_key_off" label="Reset API keys" destructive onSelect={() => run("API keys revoked", () => resetDeveloperApiKeys(developer.id))} />
+          <Item icon="verified_user" label="Verify" disabled={disabled} title={disabledTitle} onSelect={() => void actions.verify()} />
+          <Item icon="report" label="Escalate" disabled={disabled} title={disabledTitle} onSelect={() => void actions.escalate("Manual review")} />
+          <Item icon="vpn_key_off" label="Reset API keys" destructive disabled={disabled} title={disabledTitle} onSelect={() => void actions.resetApiKeys()} />
           <DropdownMenu.Separator className="ds-menu__sep" />
-          <Item icon="block" label="Suspend developer" destructive onSelect={() => run("Suspended", () => suspendDeveloper(developer.id, "Super-admin manual"))} />
+          <Item icon="block" label="Suspend developer" destructive disabled={disabled} title={disabledTitle} onSelect={() => void actions.suspend("Super-admin manual")} />
           <DropdownMenu.Separator className="ds-menu__sep" />
-          <Item icon="forum" label="Send message" disabled />
-          <Item icon="account_tree" label="View dependencies" disabled />
-          <Item icon="payments" label="View billing" disabled />
+          <Item icon="login" label="Impersonate" disabled={disabled} title={disabledTitle} onSelect={() => void actions.impersonate()} />
+          <Item icon="forum" label="Send message" href={`/developers/${developer.id}`} />
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
@@ -67,6 +50,7 @@ function Item({
   href,
   destructive,
   disabled,
+  title,
 }: {
   icon: string;
   label: string;
@@ -74,9 +58,11 @@ function Item({
   href?: string;
   destructive?: boolean;
   disabled?: boolean;
+  title?: string;
 }) {
   return (
     <DropdownMenu.Item
+      title={title}
       onSelect={(e) => {
         if (disabled) {
           e.preventDefault();

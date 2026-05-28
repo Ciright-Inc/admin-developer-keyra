@@ -38,7 +38,11 @@ export function OrganizationsTable() {
   qs.set("page", String(page));
   qs.set("limit", String(limit));
 
-  const { data, isLoading, mutate } = useSWR<ListResponse<Organization>>(`/organizations?${qs}`, swrFetcher, { revalidateOnFocus: false });
+  const { data, isLoading, mutate } = useSWR<ListResponse<Organization>>(
+    `/organizations?${qs}`,
+    swrFetcher,
+    { revalidateOnFocus: false },
+  );
   const rows = data?.items ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -56,39 +60,34 @@ export function OrganizationsTable() {
         </Button>
       }
     >
-      <div className="px-3 pt-3">
-        <div className="ds-filter-bar">
-          <div className="relative">
-            <MaterialIcon name="search" size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--ds-muted)]" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search organizations…" className="ds-input ds-input--icon" />
-          </div>
-          <select className="ds-select" value={country} onChange={(e) => setCountry(e.target.value)}>
-            <option value="">Country (all)</option>
-            {COUNTRY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <select className="ds-select" value={industry} onChange={(e) => setIndustry(e.target.value)}>
-            <option value="">Industry (all)</option>
-            {INDUSTRY_OPTIONS.map((i) => <option key={i} value={i}>{i.replace(/_/g, " ")}</option>)}
-          </select>
-          <select className="ds-select" value={tier} onChange={(e) => setTier(e.target.value)}>
-            <option value="">Tier (all)</option>
-            {TIER_OPTIONS.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
-          <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setCountry(""); setIndustry(""); setTier(""); }}>
-            <MaterialIcon name="restart_alt" size={13} /> Reset
-          </Button>
-        </div>
+      <div className="px-4 pt-4">
+        <OrganizationsFilterBar
+          search={search}
+          onSearch={setSearch}
+          country={country}
+          onCountry={setCountry}
+          industry={industry}
+          onIndustry={setIndustry}
+          tier={tier}
+          onTier={setTier}
+          onReset={() => {
+            setSearch("");
+            setCountry("");
+            setIndustry("");
+            setTier("");
+          }}
+        />
       </div>
-      <div className="ds-table-wrap !rounded-none !border-0 mt-3">
+      <div className="ds-table-wrap is-scrollable mt-4">
         <table className="ds-table ds-table--compact">
           <thead>
             <tr>
-              <th>Organization</th>
+              <th className="ds-table__col-sticky">Organization</th>
               <th>Industry</th>
               <th>Country</th>
               <th>Tier</th>
               <th>Devs</th>
-              <th>Apps</th>
+              <th>Projects</th>
               <th>API util</th>
               <th>AI agents</th>
               <th>Verif.</th>
@@ -102,35 +101,76 @@ export function OrganizationsTable() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={15} className="text-center py-12 text-[var(--ds-muted)]">Loading…</td></tr>
+              <tr>
+                <td colSpan={15} className="text-center py-12 text-[var(--ds-muted)]">
+                  <MaterialIcon name="hourglass" size={14} /> Loading organizations…
+                </td>
+              </tr>
             ) : rows.length === 0 ? (
-              <tr><td colSpan={15} className="text-center py-16 text-[var(--ds-muted)]">No organizations match.</td></tr>
+              <tr>
+                <td colSpan={15} className="text-center py-16 text-[var(--ds-muted)]">
+                  <div className="flex flex-col items-center gap-2">
+                    <MaterialIcon name="search_off" size={20} />
+                    <div>No organizations match the current filters.</div>
+                  </div>
+                </td>
+              </tr>
             ) : (
               rows.map((o) => (
                 <tr key={o.id}>
-                  <td>
-                    <Link href={`/organizations/${o.id}`} className="flex items-center gap-2.5 group">
-                      <span className="ds-avatar !w-8 !h-8 !rounded-md !text-[10.5px]">{initialsOf(o.name)}</span>
+                  <td className="ds-table__col-sticky">
+                    <Link href={`/organizations/${o.id}`} className="flex items-center gap-2.5 group min-w-[200px]">
+                      <span className="ds-avatar !w-8 !h-8 !rounded-md !text-[10.5px] shrink-0">
+                        {initialsOf(o.name)}
+                      </span>
                       <span className="min-w-0">
-                        <span className="block text-[12.5px] text-[var(--ds-ink)] font-medium truncate group-hover:text-[var(--keyra-accent)]">{o.name}</span>
+                        <span className="block text-[12.5px] text-[var(--ds-ink)] font-medium truncate group-hover:text-[var(--keyra-accent)]">
+                          {o.name}
+                        </span>
                         <span className="block text-[11px] text-[var(--ds-muted)] truncate font-mono">{o.slug}</span>
                       </span>
                     </Link>
                   </td>
-                  <td><Badge tone="muted">{o.industry_slug?.replace(/_/g, " ") ?? "—"}</Badge></td>
-                  <td><Badge tone="muted">{o.country_iso2 ?? "—"}</Badge></td>
-                  <td><Badge tone={o.enterprise_tier === "enterprise" || o.enterprise_tier === "sovereign" ? "accent" : "muted"}>{o.enterprise_tier?.toUpperCase()}</Badge></td>
+                  <td>
+                    <Badge tone="muted">{o.industry_slug?.replace(/_/g, " ") ?? "—"}</Badge>
+                  </td>
+                  <td>
+                    <Badge tone="muted">{o.country_iso2 ?? o.region ?? "—"}</Badge>
+                  </td>
+                  <td>
+                    <Badge tone={o.enterprise_tier === "enterprise" || o.enterprise_tier === "sovereign" ? "accent" : "muted"}>
+                      {o.enterprise_tier?.toUpperCase() ?? "—"}
+                    </Badge>
+                  </td>
                   <td className="font-mono tabular-nums">{formatNumber(o.developer_count)}</td>
                   <td className="font-mono tabular-nums">{formatNumber(o.application_count)}</td>
                   <td className="font-mono tabular-nums">{formatPercent(Number(o.api_utilization_pct), 1)}</td>
                   <td className="font-mono tabular-nums">{formatNumber(o.ai_agent_count)}</td>
-                  <td><span className="font-mono tabular-nums">{o.verification_rating}</span></td>
-                  <td><Badge tone={o.security_score > 80 ? "success" : o.security_score > 50 ? "warning" : "critical"}>{o.security_score}</Badge></td>
-                  <td><Badge tone={o.operational_risk_score > 60 ? "critical" : o.operational_risk_score > 30 ? "warning" : "success"}>{o.operational_risk_score}</Badge></td>
-                  <td><StatusPill value={o.compliance_level} /></td>
-                  <td><StatusPill value={o.telecom_integration_status} /></td>
-                  <td className="font-mono tabular-nums text-[var(--ds-ink)]">{formatCurrency(Number(o.monthly_recurring_revenue_usd), "USD", { compact: true })}</td>
-                  <td><StatusPill value={o.status} /></td>
+                  <td>
+                    <span className="font-mono tabular-nums">{o.verification_rating}</span>
+                  </td>
+                  <td>
+                    <Badge tone={o.security_score > 80 ? "success" : o.security_score > 50 ? "warning" : "critical"}>
+                      {o.security_score}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Badge tone={o.operational_risk_score > 60 ? "critical" : o.operational_risk_score > 30 ? "warning" : "success"}>
+                      {o.operational_risk_score}
+                    </Badge>
+                  </td>
+                  <td>
+                    <StatusPill value={o.compliance_level} />
+                  </td>
+                  <td>
+                    <StatusPill value={o.telecom_integration_status} />
+                  </td>
+                  <td className="font-mono tabular-nums text-[var(--ds-ink)] whitespace-nowrap">
+                    {formatCurrency(Number(o.monthly_recurring_revenue_usd), "USD", { compact: true })}
+                  </td>
+                  <td>
+                    <StatusPill value={o.status} />
+                  </td>
                 </tr>
               ))
             )}
@@ -138,12 +178,80 @@ export function OrganizationsTable() {
         </table>
       </div>
       <div className="ds-pagination">
-        <div>Page <strong className="text-[var(--ds-ink)]">{page}</strong> of <strong className="text-[var(--ds-ink)]">{totalPages}</strong> · <span className="font-mono tabular-nums">{formatNumber(total)} total</span></div>
+        <div>
+          Page <strong className="text-[var(--ds-ink)]">{page}</strong> of{" "}
+          <strong className="text-[var(--ds-ink)]">{totalPages}</strong>
+          {" · "}
+          <span className="font-mono tabular-nums">{formatNumber(total)} total</span>
+        </div>
         <div className="ds-pagination__actions">
-          <Button variant="ghost" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}><MaterialIcon name="chevron_left" size={14}/> Prev</Button>
-          <Button variant="ghost" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next <MaterialIcon name="chevron_right" size={14}/></Button>
+          <Button variant="ghost" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+            <MaterialIcon name="chevron_left" size={14} /> Prev
+          </Button>
+          <Button variant="ghost" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+            Next <MaterialIcon name="chevron_right" size={14} />
+          </Button>
         </div>
       </div>
     </Panel>
+  );
+}
+
+function OrganizationsFilterBar(props: {
+  search: string;
+  onSearch: (v: string) => void;
+  country: string;
+  onCountry: (v: string) => void;
+  industry: string;
+  onIndustry: (v: string) => void;
+  tier: string;
+  onTier: (v: string) => void;
+  onReset: () => void;
+}) {
+  return (
+    <div className="ds-filter-bar">
+      <div className="relative flex-1 min-w-[240px]">
+        <MaterialIcon name="search" size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--ds-muted)]" />
+        <input
+          value={props.search}
+          onChange={(e) => props.onSearch(e.target.value)}
+          placeholder="Search organizations…"
+          className="ds-input ds-input--icon"
+        />
+      </div>
+      <div className="w-[170px] min-w-[170px]">
+        <select className="ds-select" value={props.country} onChange={(e) => props.onCountry(e.target.value)}>
+          <option value="">Country (all)</option>
+          {COUNTRY_OPTIONS.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="w-[190px] min-w-[190px]">
+        <select className="ds-select" value={props.industry} onChange={(e) => props.onIndustry(e.target.value)}>
+          <option value="">Industry (all)</option>
+          {INDUSTRY_OPTIONS.map((i) => (
+            <option key={i} value={i}>
+              {i.replace(/_/g, " ")}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="w-[170px] min-w-[170px]">
+        <select className="ds-select" value={props.tier} onChange={(e) => props.onTier(e.target.value)}>
+          <option value="">Tier (all)</option>
+          {TIER_OPTIONS.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+      </div>
+      <Button variant="ghost" size="sm" onClick={props.onReset}>
+        <MaterialIcon name="restart_alt" size={13} /> Reset
+      </Button>
+    </div>
   );
 }

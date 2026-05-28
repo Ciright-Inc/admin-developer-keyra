@@ -43,10 +43,14 @@ export interface AdminMe {
 
 export interface Developer {
   id: string;
+  developer_account_id?: string | null;
+  user_id?: number | null;
+  auth_role?: string | null;
+  has_developer_account?: boolean;
   display_name: string;
   professional_email: string;
   mobile_phone: string;
-  created_at: string;
+  created_at: string | null;
   subscription_hash: string | null;
   username: string | null;
   country_iso2: string | null;
@@ -71,6 +75,7 @@ export interface Developer {
   last_activity_at: string | null;
   application_count: number;
   organization_count: number;
+  sdk_distinct_count?: number;
 }
 
 export interface Organization {
@@ -108,6 +113,11 @@ export interface Application {
   name: string;
   slug: string;
   platform: string;
+  framework?: string | null;
+  environment?: string | null;
+  production_listing_review_status?: string | null;
+  api_key_count?: number;
+  active_api_key_count?: number;
   status: string;
   trust_status: string;
   verification_status: string;
@@ -122,6 +132,8 @@ export interface Application {
   sim_identity_enabled: boolean;
   compliance_status: string;
   last_deployment_at: string | null;
+  callback_url?: string | null;
+  description?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -188,8 +200,45 @@ export interface Sdk {
   platform: string;
   latest_version: string;
   install_count: number | string;
+  developer_count?: number;
+  production_count?: number;
+  active_count?: number;
+  last_adoption_at?: string | null;
   deprecated_at: string | null;
   description: string;
+}
+
+export interface SdkCatalogue {
+  id: string;
+  name: string;
+  slug: string;
+  platform: string;
+  language: string;
+  install_command: string;
+  quick_start: string;
+  status: "stable" | "coming_soon" | "deprecated";
+  latest_version: string;
+  install_count: number | string;
+  repository_url: string | null;
+  package_manager: string;
+  featured: boolean;
+  sort_order: number;
+  deprecated_at: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  version_count?: number;
+}
+
+export interface SdkVersion {
+  id: string;
+  sdk_id: string;
+  version: string;
+  changelog: string;
+  status: "draft" | "published" | "deprecated";
+  published_at: string | null;
+  is_latest: boolean;
+  created_at: string;
 }
 
 export interface InfraNode {

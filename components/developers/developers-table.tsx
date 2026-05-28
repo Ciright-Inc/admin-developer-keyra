@@ -26,6 +26,7 @@ import {
 } from "@/lib/utils";
 import { adminUrl } from "@/lib/admin-backend-url";
 import { swrFetcher } from "@/lib/admin-fetch";
+import { developersExportUrl } from "@/features/developers/services/developer-service";
 import type { Developer, ListResponse } from "@/types/admin";
 
 const COUNTRY_OPTIONS = ["US","GB","IE","DE","FR","NL","ES","IT","SE","NO","CH","CA","BR","MX","AE","SA","IL","IN","SG","JP","KR","AU","NZ","ZA","NG"];
@@ -92,7 +93,21 @@ export function DevelopersTable() {
           <Button variant="ghost" size="sm" onClick={() => void mutate()}>
             <MaterialIcon name="refresh" size={13} /> Refresh
           </Button>
-          <Button variant="accent" size="sm">
+          <Button
+            variant="accent"
+            size="sm"
+            onClick={() => {
+              const url = developersExportUrl({
+                search: search || undefined,
+                country: country || undefined,
+                industry: industry || undefined,
+                status: status || undefined,
+                lifecycle: lifecycle || undefined,
+                sort,
+              });
+              window.open(url, "_blank", "noopener,noreferrer");
+            }}
+          >
             <MaterialIcon name="file_download" size={13} /> Export CSV
           </Button>
         </div>
@@ -251,12 +266,31 @@ function makeColumns(onChanged: () => void): ColumnDef<Developer>[] {
       size: 280,
       cell: ({ row }) => {
         const d = row.original;
+        const subline = d.professional_email
+          ? `@${d.username ?? "—"} · ${d.professional_email}`
+          : d.mobile_phone || "—";
         return (
-          <Link href={`/developers/${d.id}`} className="flex items-center gap-2.5 group">
-            <span className="ds-avatar !w-8 !h-8 !rounded-md !text-[11px]">{initialsOf(d.display_name || d.professional_email)}</span>
+          <Link href={`/developers/${d.id}`} className="flex items-center gap-2.5 group min-w-[220px]">
+            <span className="ds-avatar !w-8 !h-8 !rounded-md !text-[11px] shrink-0">
+              {initialsOf(d.display_name || d.professional_email || d.mobile_phone)}
+            </span>
             <span className="min-w-0">
-              <span className="block text-[12.5px] text-[var(--ds-ink)] font-medium truncate group-hover:text-[var(--keyra-accent)]">{d.display_name || "—"}</span>
-              <span className="block text-[11px] text-[var(--ds-muted)] truncate">@{d.username ?? "—"} · {d.professional_email}</span>
+              <span className="flex items-center gap-1.5 min-w-0">
+                <span className="text-[12.5px] text-[var(--ds-ink)] font-medium truncate group-hover:text-[var(--keyra-accent)]">
+                  {d.display_name || "—"}
+                </span>
+                {d.auth_role === "super_admin" ? (
+                  <Badge tone="accent" className="!text-[9px] !px-1.5 !py-0 shrink-0 uppercase tracking-wide">
+                    Super admin
+                  </Badge>
+                ) : null}
+                {d.has_developer_account === false ? (
+                  <Badge tone="muted" className="!text-[9px] !px-1.5 !py-0 shrink-0">
+                    No workspace
+                  </Badge>
+                ) : null}
+              </span>
+              <span className="block text-[11px] text-[var(--ds-muted)] truncate">{subline}</span>
             </span>
           </Link>
         );
@@ -271,8 +305,16 @@ function makeColumns(onChanged: () => void): ColumnDef<Developer>[] {
     { id: "city", header: "City", cell: ({ row }) => <span className="text-[11.5px]">{row.original.city || "—"}</span> },
     { id: "org_count", header: "Orgs", cell: ({ row }) => <span className="font-mono tabular-nums">{formatNumber(row.original.organization_count)}</span> },
     { id: "team_size", header: "Team", cell: ({ row }) => <span className="font-mono tabular-nums">{formatNumber(row.original.team_size)}</span> },
-    { id: "app_count", header: "Apps", cell: ({ row }) => <span className="font-mono tabular-nums">{formatNumber(row.original.application_count)}</span> },
-    { id: "sdk_count", header: "SDKs", cell: () => <span className="font-mono tabular-nums text-[var(--ds-muted)]">—</span> },
+    { id: "app_count", header: "Projects", cell: ({ row }) => <span className="font-mono tabular-nums">{formatNumber(row.original.application_count)}</span> },
+    {
+      id: "sdk_count",
+      header: "SDKs",
+      cell: ({ row }) => (
+        <span className="font-mono tabular-nums">
+          {row.original.sdk_distinct_count ? formatNumber(row.original.sdk_distinct_count) : "—"}
+        </span>
+      ),
+    },
     { id: "api_calls_24h", header: "API 24h", meta: { sortKey: "api_calls_24h" }, cell: ({ row }) => <span className="font-mono tabular-nums">{formatNumber(Number(row.original.api_calls_24h ?? 0), { compact: true })}</span> },
     { id: "trust", header: "Trust", meta: { sortKey: "trust_score" }, cell: ({ row }) => <TrustChip value={Number(row.original.trust_score ?? 0)} /> },
     { id: "verification", header: "Verification", cell: ({ row }) => <StatusPill value={row.original.verification_status} /> },

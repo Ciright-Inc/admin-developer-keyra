@@ -26,15 +26,15 @@ export const PRIMARY_NAV: NavSection[] = [
     items: [
       { href: "/developers", label: "Developers", icon: "groups", description: "Every developer on KEYRA" },
       { href: "/organizations", label: "Organizations", icon: "domain", description: "Companies & tenants" },
-      { href: "/applications", label: "Applications", icon: "deployed_code", description: "Apps, agents & APIs" },
+      { href: "/applications", label: "Projects", icon: "folder_special", description: "Developer workspace projects" },
     ],
   },
   {
     id: "infrastructure",
     label: "Infrastructure",
     items: [
-      { href: "/api-infrastructure", label: "API infrastructure", icon: "device_hub", description: "Edge nodes & RPS" },
-      { href: "/sdks", label: "SDK management", icon: "package_2", description: "Versions & adoption" },
+      { href: "/api-infrastructure", label: "API infrastructure", icon: "device_hub", description: "Live API traffic & latency" },
+      { href: "/sdks", label: "SDK management", icon: "package_2", description: "Framework adoption by project" },
       { href: "/ai-agents", label: "AI agent ecosystem", icon: "smart_toy", description: "Agents & accountability" },
       { href: "/trust-verification", label: "Trust verification", icon: "verified_user", description: "Human + identity chain" },
       { href: "/telecom", label: "Telecom integrations", icon: "cell_tower", description: "Carriers & SIM identity" },

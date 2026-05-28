@@ -7,7 +7,7 @@ function ThemedToaster() {
   const { theme } = useTheme();
   return (
     <Toaster
-      position="bottom-right"
+      position="top-right"
       theme={theme}
       toastOptions={{
         style: {

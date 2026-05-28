@@ -1,8 +1,11 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { StatusPill } from "@/components/ui/status-pill";
 import { TrustRing } from "@/components/ui/trust-ring";
+import type { useDeveloperActions } from "@/features/developers/hooks/use-developer-actions";
 import {
   formatCurrency,
   formatDate,
@@ -13,7 +16,20 @@ import {
 } from "@/lib/utils";
 import type { Developer } from "@/types/admin";
 
-export function DeveloperProfileHeader({ developer }: { developer: Developer }) {
+type Actions = ReturnType<typeof useDeveloperActions>;
+
+export function DeveloperProfileHeader({
+  developer,
+  actions,
+  onMessage,
+}: {
+  developer: Developer;
+  actions?: Actions;
+  onMessage?: () => void;
+}) {
+  const disabled = actions && !actions.canAct;
+  const title = actions?.disabledReason;
+
   return (
     <section className="ds-profile-header flex-col xl:flex-row items-stretch xl:items-center justify-between gap-6">
       <div className="flex items-center gap-4 min-w-0">
@@ -21,6 +37,9 @@ export function DeveloperProfileHeader({ developer }: { developer: Developer }) 
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-[18px] font-semibold text-[var(--ds-ink)] truncate">{developer.display_name || "Untitled developer"}</h2>
+            {developer.auth_role === "super_admin" ? (
+              <Badge tone="accent">Super admin</Badge>
+            ) : null}
             <Badge tone={developer.account_status === "active" ? "success" : "error"} dot>
               {developer.account_status ?? "unknown"}
             </Badge>
@@ -51,24 +70,26 @@ export function DeveloperProfileHeader({ developer }: { developer: Developer }) 
       <div className="flex flex-wrap items-center gap-6">
         <TrustRing score={developer.trust_score ?? 0} label="Trust score" size={92} />
         <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-          <Stat label="Apps" value={formatNumber(developer.application_count)} />
+          <Stat label="Projects" value={formatNumber(developer.application_count)} />
           <Stat label="Orgs" value={formatNumber(developer.organization_count)} />
           <Stat label="Team" value={formatNumber(developer.team_size)} />
           <Stat label="API 24h" value={formatNumber(Number(developer.api_calls_24h ?? 0), { compact: true })} />
           <Stat label="Revenue" value={formatCurrency(Number(developer.revenue_contribution_usd ?? 0), "USD", { compact: true })} />
           <Stat label="Reputation" value={developer.reputation_index ?? "—"} />
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost">
-            <MaterialIcon name="forum" size={14} /> Message
-          </Button>
-          <Button variant="accent">
-            <MaterialIcon name="verified_user" size={14} /> Verify
-          </Button>
-          <Button variant="danger">
-            <MaterialIcon name="block" size={14} /> Suspend
-          </Button>
-        </div>
+        {actions ? (
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" disabled={actions.busy || disabled} title={title} onClick={onMessage}>
+              <MaterialIcon name="forum" size={14} /> Message
+            </Button>
+            <Button variant="accent" disabled={actions.busy || disabled} title={title} onClick={() => void actions.verify()}>
+              <MaterialIcon name="verified_user" size={14} /> Verify
+            </Button>
+            <Button variant="danger" disabled={actions.busy || disabled} title={title} onClick={() => void actions.suspend("Super-admin manual")}>
+              <MaterialIcon name="block" size={14} /> Suspend
+            </Button>
+          </div>
+        ) : null}
       </div>
     </section>
   );

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import useSWR from "swr";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { Panel } from "@/components/ui/panel";
@@ -19,13 +18,12 @@ import type { Developer } from "@/types/admin";
 
 const TABS: TabItem[] = [
   { value: "overview", label: "Overview", icon: "dashboard" },
-  { value: "applications", label: "Applications", icon: "deployed_code" },
+  { value: "applications", label: "Projects", icon: "deployed_code" },
   { value: "organizations", label: "Organizations", icon: "domain" },
   { value: "team", label: "Team", icon: "groups" },
   { value: "billing", label: "Billing", icon: "credit_card" },
   { value: "sdk-usage", label: "SDK usage", icon: "package_2" },
   { value: "api-usage", label: "API usage", icon: "bolt" },
-  { value: "ai-agents", label: "AI agents", icon: "smart_toy" },
   { value: "trust", label: "Trust metrics", icon: "verified_user" },
   { value: "verifications", label: "Verifications", icon: "task_alt" },
   { value: "security", label: "Security", icon: "shield" },
@@ -35,8 +33,6 @@ const TABS: TabItem[] = [
   { value: "geo", label: "Geographic", icon: "public" },
   { value: "telecom", label: "Telecom", icon: "cell_tower" },
   { value: "dependencies", label: "Dependencies", icon: "account_tree" },
-  { value: "notifications", label: "Notifications", icon: "notifications" },
-  { value: "outreach", label: "Outreach", icon: "campaign" },
   { value: "risk", label: "Risk", icon: "warning" },
 ];
 
@@ -97,7 +93,7 @@ function OverviewTab({ developer }: { developer: Developer }) {
       </Panel>
       <Panel title="Operational" icon="device_hub">
         <DefList rows={[
-          ["Applications", formatNumber(developer.application_count)],
+          ["Projects", formatNumber(developer.application_count)],
           ["Organizations", formatNumber(developer.organization_count)],
           ["Team size", formatNumber(developer.team_size)],
           ["Fraud risk", <Badge key="f" tone={(developer.fraud_risk_score ?? 0) > 60 ? "critical" : "muted"}>{developer.fraud_risk_score ?? "—"}</Badge>],
@@ -159,12 +155,12 @@ function ErrorState({ message }: { message: string }) {
 
 // ─── AutoTable renders any tab payload that's an array of records ────────────
 const COLUMN_HINTS: Record<string, string[]> = {
-  applications: ["name", "platform", "status", "trust_status", "monthly_active_users", "daily_api_calls", "revenue_generated_usd", "updated_at"],
-  organizations: ["name", "industry_slug", "country_iso2", "enterprise_tier", "monthly_recurring_revenue_usd"],
-  team: ["organization_name", "role", "created_at"],
+  applications: ["name", "platform", "environment", "status", "active_api_key_count", "updated_at"],
+  organizations: ["name", "industry_slug", "country_iso2", "enterprise_tier", "application_count", "role"],
+  team: ["display_name", "professional_email", "role", "created_at"],
   billing: ["cardholder_name", "card_type", "last_four_digits", "is_default", "created_at"],
-  "sdk-usage": ["name", "platform", "version", "installed_at", "application_name"],
-  "api-usage": ["name", "daily_api_calls", "monthly_active_users", "last_deployment_at"],
+  "sdk-usage": ["name", "platform", "project_count", "installed_at"],
+  "api-usage": ["application_name", "endpoint", "method", "status_code", "latency_ms", "occurred_at"],
   "ai-agents": ["name", "model_type", "trust_rating", "status", "api_consumption_24h", "escalation_count"],
   trust: ["verification_type", "outcome", "trust_delta", "occurred_at"],
   verifications: ["event_type", "outcome", "channel", "occurred_at"],
@@ -172,8 +168,8 @@ const COLUMN_HINTS: Record<string, string[]> = {
   fraud: ["fraud_type", "severity", "status", "blocked", "detected_at"],
   audit: ["action", "target_type", "target_id", "ip_address", "occurred_at"],
   compliance: ["reason", "severity", "status", "opened_at", "closed_at"],
-  telecom: ["carrier_name", "country_iso2", "status", "verification_density_pct", "monthly_requests"],
-  dependencies: ["name", "platform", "trust_status", "sdk_count", "api_key_count"],
+  telecom: ["project_name", "callback_url", "platform", "environment", "status", "active_keys"],
+  dependencies: ["name", "platform", "trust_status", "api_key_count"],
   notifications: ["title", "delivered_at", "read_at"],
   outreach: ["campaign_name", "stage", "engagement_score", "adoption_likelihood", "last_touched_at"],
 };

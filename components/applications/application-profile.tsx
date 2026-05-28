@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import useSWR from "swr";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { developerPortalUrl } from "@/lib/developer-portal-url";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/ui/material-icon";
@@ -24,16 +26,36 @@ const TABS: TabItem[] = [
   { value: "audit", label: "Audit", icon: "manage_search" },
 ];
 
-export function ApplicationProfile({ application }: { application: Application }) {
+export function ApplicationProfile({
+  application,
+  onChanged,
+}: {
+  application: Application;
+  onChanged?: () => void;
+}) {
+  const router = useRouter();
   const [active, setActive] = React.useState("overview");
+  const ideUrl = developerPortalUrl(`/projects/${application.id}`);
 
   const onSuspend = async () => {
-    try { await suspendApplication(application.id); toast.success("Application suspended"); }
-    catch (e) { toast.error(`Suspend failed: ${(e as Error).message}`); }
+    try {
+      await suspendApplication(application.id);
+      toast.success("Project archived");
+      onChanged?.();
+      router.refresh();
+    } catch (e) {
+      toast.error(`Suspend failed: ${(e as Error).message}`);
+    }
   };
   const onRevoke = async () => {
-    try { await revokeApplication(application.id); toast.success("All API keys revoked"); }
-    catch (e) { toast.error(`Revoke failed: ${(e as Error).message}`); }
+    try {
+      await revokeApplication(application.id);
+      toast.success("All API keys revoked");
+      onChanged?.();
+      router.refresh();
+    } catch (e) {
+      toast.error(`Revoke failed: ${(e as Error).message}`);
+    }
   };
 
   return (
@@ -52,7 +74,17 @@ export function ApplicationProfile({ application }: { application: Application }
   );
 }
 
-function ApplicationHeader({ application: a, onSuspend, onRevoke }: { application: Application; onSuspend: () => void; onRevoke: () => void }) {
+function ApplicationHeader({
+  application: a,
+  ideUrl,
+  onSuspend,
+  onRevoke,
+}: {
+  application: Application;
+  ideUrl: string;
+  onSuspend: () => void;
+  onRevoke: () => void;
+}) {
   return (
     <section className="ds-profile-header flex-col xl:flex-row items-stretch xl:items-center justify-between gap-6">
       <div className="flex items-start gap-4 min-w-0">
@@ -76,14 +108,15 @@ function ApplicationHeader({ application: a, onSuspend, onRevoke }: { applicatio
         </div>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
-        <Stat label="MAU" value={formatNumber(Number(a.monthly_active_users), { compact: true })} />
-        <Stat label="API 24h" value={formatNumber(Number(a.daily_api_calls), { compact: true })} />
-        <Stat label="Revenue" value={formatCurrency(Number(a.revenue_generated_usd), "USD", { compact: true })} />
-        <Stat label="Fraud 24h" value={a.fraud_events_24h > 0 ? <Badge tone="critical">{a.fraud_events_24h}</Badge> : <span className="font-mono">0</span>} />
-        <Stat label="Deployed" value={formatRelativeTime(a.last_deployment_at)} />
+        <Stat label="Listing downloads" value={formatNumber(Number(a.monthly_active_users), { compact: true })} />
+        <Stat label="API calls 24h" value={formatNumber(Number(a.daily_api_calls), { compact: true })} />
+        <Stat label="Active keys" value={formatNumber(Number(a.active_api_key_count ?? a.api_key_count ?? 0))} />
+        <Stat label="Updated" value={formatRelativeTime(a.updated_at)} />
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost"><MaterialIcon name="open_in_new" size={14}/> Open in IDE</Button>
+        <Button variant="ghost" onClick={() => window.open(ideUrl, "_blank", "noopener,noreferrer")}>
+          <MaterialIcon name="open_in_new" size={14}/> Open in IDE
+        </Button>
         <Button variant="ghost" onClick={onSuspend}><MaterialIcon name="pause" size={14}/> Suspend</Button>
         <Button variant="danger" onClick={onRevoke}><MaterialIcon name="vpn_key_off" size={14}/> Revoke keys</Button>
       </div>
@@ -160,13 +193,15 @@ function CredentialsTab({ id }: { id: string }) {
        keys.length === 0 ? <div className="py-6 text-center text-[var(--ds-muted)]">No API keys yet.</div> :
        <div className="ds-table-wrap !rounded-md">
          <table className="ds-table ds-table--compact">
-           <thead><tr><th>Prefix</th><th>Environment</th><th>Scopes</th><th>Status</th><th>Last used</th><th>Created</th></tr></thead>
+           <thead><tr><th>Name</th><th>Type</th><th>Client ID</th><th>Prefix</th><th>Environment</th><th>Status</th><th>Last used</th><th>Created</th></tr></thead>
            <tbody>
              {keys.map((k) => (
                <tr key={k.id}>
+                 <td>{k.name ?? "—"}</td>
+                 <td><Badge tone="muted">{k.type ?? "—"}</Badge></td>
+                 <td className="font-mono text-[11px]">{k.client_id ?? "—"}</td>
                  <td className="font-mono">{k.prefix}…{shortHash(k.hashed_key, 6)}</td>
                  <td><Badge tone={k.environment === "production" ? "accent" : "muted"}>{k.environment}</Badge></td>
-                 <td><span className="font-mono text-[11px]">{Array.isArray(k.scopes) ? k.scopes.join(", ") : "—"}</span></td>
                  <td><StatusPill value={k.status} /></td>
                  <td className="text-[11.5px]">{formatRelativeTime(k.last_used_at)}</td>
                  <td className="text-[11.5px]">{formatDate(k.created_at)}</td>
@@ -182,9 +217,9 @@ function CredentialsTab({ id }: { id: string }) {
 function TelemetryTab({ a }: { a: Application }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-      <Panel title="Daily API calls" icon="bolt"><div className="text-[26px] font-semibold text-[var(--ds-ink)] font-mono">{formatNumber(Number(a.daily_api_calls))}</div></Panel>
-      <Panel title="Monthly active users" icon="groups"><div className="text-[26px] font-semibold text-[var(--ds-ink)] font-mono">{formatNumber(Number(a.monthly_active_users))}</div></Panel>
-      <Panel title="Revenue generated" icon="payments"><div className="text-[26px] font-semibold text-[var(--ds-ink)] font-mono">{formatCurrency(Number(a.revenue_generated_usd))}</div></Panel>
+      <Panel title="API calls (24h)" icon="bolt"><div className="text-[26px] font-semibold text-[var(--ds-ink)] font-mono">{formatNumber(Number(a.daily_api_calls))}</div></Panel>
+      <Panel title="Listing downloads" icon="groups"><div className="text-[26px] font-semibold text-[var(--ds-ink)] font-mono">{formatNumber(Number(a.monthly_active_users))}</div></Panel>
+      <Panel title="API keys" icon="vpn_key"><div className="text-[26px] font-semibold text-[var(--ds-ink)] font-mono">{formatNumber(Number(a.active_api_key_count ?? 0))} active</div></Panel>
     </div>
   );
 }
@@ -227,8 +262,10 @@ function ComplianceTab({ a }: { a: Application }) {
 }
 
 function AuditTab({ id }: { id: string }) {
-  const { data, isLoading } = useSWR<{ ok: true; items: { id: number; action: string; occurred_at: string; payload: unknown }[] }>(`/audit-logs?target_type=application&page=1&limit=50`, swrFetcher);
-  void id;
+  const { data, isLoading } = useSWR<{ ok: true; items: { id: number; action: string; occurred_at: string; payload: unknown }[] }>(
+    `/audit-logs?target_type=project&target_id=${encodeURIComponent(id)}&page=1&limit=50`,
+    swrFetcher,
+  );
   const items = data?.items ?? [];
   return (
     <Panel title="Audit trail" icon="manage_search">

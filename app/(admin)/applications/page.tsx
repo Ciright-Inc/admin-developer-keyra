@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { ApplicationsTable } from "@/components/applications/applications-table";
@@ -10,14 +11,16 @@ export default function ApplicationsPage() {
       <PageHeader
         eyebrow={
           <>
-            <span>SECTION // APPLICATIONS</span>
+            <span>SECTION // PROJECTS</span>
             <Badge tone="info" dot>LIVE</Badge>
           </>
         }
-        title="Global application catalogue"
-        subtitle="Every iOS, Android, Web, AI Agent, API, Enterprise SaaS, Metaverse, Telecom, Government, Medical, Financial, Gaming and Autonomous app that depends on KEYRA — with revocation controls."
+        title="Global projects registry"
+        subtitle="Every developer project in the KEYRA workspace — across all companies and accounts, with environment, listing status, and API key controls."
       />
-      <ApplicationsTable />
+      <Suspense fallback={<div className="ds-panel p-8 text-center text-[var(--ds-muted)]">Loading projects…</div>}>
+        <ApplicationsTable />
+      </Suspense>
     </>
   );
 }

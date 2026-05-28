@@ -135,6 +135,13 @@ Re-running the seed is safe — it upserts and tops up developers, organizations
 applications, AI agents, country/industry intelligence rolls and a handful of
 seed incidents, escalations and audit entries.
 
+To wipe fixture data and keep only `super_admin` access (local DB):
+
+```bash
+cd ../simsecure-auth-session
+npm run purge:keyra-admin
+```
+
 ### 3. Start the console
 
 ```bash
